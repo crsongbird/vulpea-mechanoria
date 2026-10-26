@@ -9,6 +9,11 @@ Ruby decides the design; nothing here is final until Ruby says so. The research 
 An open-world walking and survival game on a ringworld. In Ruby's words, "breath of the wild meets Elder Scrolls Arena
 meets a walking sim/survival sim", with Risk of Rain 2's look: "give it huge subtle weight to everything".
 
+**Inspirations:** Breath of the Wild (open air, climbing, light); The Elder Scrolls: Arena (a generated world to wander);
+Risk of Rain 2 (weight, look); Nausicaä of the Valley of the Wind (a rare human in a world grown dangerous, a companion,
+the machines of an older age); Hades (many builds, items and synergies, and dying as part of the story); walking and
+survival games (The Long Dark, Valheim, Subnautica, Death Stranding).
+
 **Separation from PoetryPress.** Vulpéa is its own project with its own repository, rules, release names (Sol outward)
 and docs. PoetryPress keeps its Ringworld as a frozen, picturesque demo that still renders films, and builds other
 worlds as scenes of its own. Code moved here once, at Sol (`src/world/`, from PoetryPress's land, regions, wildlife
@@ -22,8 +27,8 @@ built twice, each project's own way. PoetryPress's docs that came along are refe
    footfalls at a distance; the player's load changes their gait. ([ror2-art.md](prior-art/ror2-art.md) §7,
    [arena-and-survival.md](prior-art/arena-and-survival.md) §5)
 2. **The ring is the spectacle.** The land curves up ahead and behind into an arch across the sky; the rim walls stand
-   at both edges taller than any mountain. Every view should show it. (Built in Mercury: `src/ring.js`,
-   `src/farRing.js`.)
+   at both edges taller than any mountain. Every view should show it. (Built in Mercury and Venus:
+   `src/ring.js`, `src/farRing.js`, `src/haze.js`.)
 3. **Walk anywhere you can see.** Climb anything, glide down, pay in stamina. No invisible walls but the rim walls
    themselves. ([botw-open-air.md](prior-art/botw-open-air.md) §1)
 4. **Atmosphere over content.** Sound, light, weather and the reveal of a new place matter more than quest count.
@@ -37,9 +42,17 @@ full of hostile androids, and of "humans" who take their orders from machines. T
 foxes; natural foxes and kitsune live in the wilds, at shrines and in older, stranger places. Mystical and East Asian
 elements run through it: shrines, torii roads, fox-fire. ([foxes-machines-shrines.md](prior-art/foxes-machines-shrines.md))
 
-**The ring.** Generated from a seed, the same seed always the same ring. At Sol it has PoetryPress's proportions: a band
-4 km wide, 444 km round, rim walls 1.2 km tall. The land has continents and seas, rivers, coasts, plateaus, ten biomes
-and regions with their own factions, banners and names (`src/world/`).
+**One canon ring.** There is one Vulpéa: the same story, the same shrines, the same universe for every player. Seeds
+control its *state*: its factions, its biomes, and its other conditions.
+
+**Its size.** A band 20 km wide, on a ring some 350 km in radius (2,200 km round), its rim walls 3 km tall (Ruby: widen
+to about 20 km). On clear days the walls are a far haze; the mountains stay under them. The land has continents and
+seas, rivers, coasts, plateaus, ten biomes and regions with their own factions, banners and names (`src/world/`).
+Stepped land, the shelves of PoetryPress's painted ring, comes only in some regions (Ruby: "only use that
+situationally").
+
+**Day and night.** The ring wobbles, so its star rises and sets over the land. The ring's outer face is solar panels,
+with nuclear reactors and spacedocks that are under constant siege.
 
 **Places.** Human villages behind walls; neon android cities; shrines on peaks, waterfalls and bound spirit rocks; one
 pilgrimage mountain per region, Inari-style, with a torii road to its summit; fox dens; ruins of the ring's builders;
@@ -50,10 +63,8 @@ waystones that reveal the map around them. ([botw-open-air.md](prior-art/botw-op
 Each is a small world of its own, walked round in minutes. See [other-worlds.md](other-worlds.md).
 
 **Open:**
-- **Scale.** Keep the 4 km band (every edge in sight, the walls always close), or widen it toward Halo's tens of km
-  (the walls a far haze, more room per region)? The circumference follows from the width.
-- Day and night: a sun that moves (as now), or the ringworld's own way, shadow squares eclipsing a sun fixed overhead?
 - How rare are humans: a village per region, or fewer?
+- Can the player reach the outer face, the reactors and the spacedocks?
 
 ## 3 · Playing
 
@@ -65,12 +76,25 @@ before the next. Shrine to shrine is a 2–4 minute walk, about one phone sessio
 and never starves you. No thirst. Cold is shown first by the body (shivering, breath fog), not by numbers.
 ([arena-and-survival.md](prior-art/arena-and-survival.md) §3, [botw-open-air.md](prior-art/botw-open-air.md) §8)
 
-**Modes.** *Wanderer*: no meters, a walking sim. *Pilgrim*: the default. *Exile*: permadeath.
-([arena-and-survival.md](prior-art/arena-and-survival.md) §4)
+**Modes.** *Wanderer*: no meters, a walking sim. *Pilgrim*: the default. (Ruby's death rule above makes every run
+roguelite; whether Wanderer keeps your things is open.) ([arena-and-survival.md](prior-art/arena-and-survival.md) §4)
 
-**Growing.** A fox companion gains a tail for each circuit of shrines, up to seven; each tail is a perk (stamina,
-warmth, glide, fox-fire). Fox jewels power both kitsune magic and fox-bots.
-([foxes-machines-shrines.md](prior-art/foxes-machines-shrines.md) §1–3)
+**Fighting.** How much depends on the weather and the region.
+
+**The player and the fox** (Ruby, 2026-10-26). The player is a rare human. Their fox companion scouts ahead and checks
+things out (as Navi does), helps heal, and knows up to three magical spells, one more as it gains tails.
+- **Weapons are scarce.** Projectile weapons are rare: the player makes them or steals them. Mostly you rely on the fox
+  and on the spells you happen to learn.
+- **Playing as the fox.** The player can switch and play as the kitsune, with the human as its companion. Some puzzles
+  only the fox can solve. Playing as the kitsune exhausts it: you risk losing magic until it rests, and having to return
+  to a shrine. Builds can let you play as the fox for longer, or for good.
+- **Death.** If you die, you start over: you wake at a shrine on the same ring. You lose everything you collected. You
+  keep the changes you made to yourself, the keys to other places, and the fox's memory of everywhere you have been.
+  Perhaps the fox loses nothing, so it can carry things for you; what it can carry is limited.
+- **Many ways to play.** Many character builds, items and synergies, as in Hades, and the world designed around them.
+- **Tails.** The fox gains a tail for each circuit of shrines, up to seven; each tail is a perk (stamina, warmth,
+  glide, fox-fire) or a spell slot. Fox jewels power both kitsune magic and fox-bots.
+  ([foxes-machines-shrines.md](prior-art/foxes-machines-shrines.md) §1–3)
 
 **Fox-fire.** Blue-white kitsunebi is the player's lantern, fire-starter and guide. A wild fox's sickly green light
 lures you off the path. ([foxes-machines-shrines.md](prior-art/foxes-machines-shrines.md) §2)
@@ -84,13 +108,12 @@ colour shows its mood. ([botw-open-air.md](prior-art/botw-open-air.md) §7,
 ([arena-and-survival.md](prior-art/arena-and-survival.md) §7)
 
 **Open:**
-- Combat: how much, and what kind? Avoidance and stealth first, or fights with weight?
-- Is the player human, kitsune, or a human with a fox companion?
+- What a build is made of: the human's changes, the fox's tails and spells, items, or all three?
 - A tiny chemistry engine (fox-fire, water, frost, charge, wind)? ([botw-open-air.md](prior-art/botw-open-air.md) §2)
 
 ## 4 · Look
 
-Risk of Rain 2's language: soft, muted, matte ground; colour grading and fog that change by region; ramp-lit
+Lit somewhat like Breath of the Wild, with a day and night cycle. Risk of Rain 2's language: soft, muted, matte ground; colour grading and fog that change by region; ramp-lit
 materials with no photorealism; a gentle outline on creatures and things you can use, none on the land. Saturation and
 glow are kept for what matters: fox-fire, shrine lights, android eyes and neon, pickups, threats. Each region has one or
 two huge forms you can read through the haze from kilometres off.
@@ -117,6 +140,7 @@ Each release is a playable step, named from Sol outward (`docs/releases.md`):
 |---|---|
 | Sol | The seed's land in chunks, a walker's camera |
 | Mercury | The ring curves: the floor rising ahead and behind into the arch, both rim walls, a floating origin |
+| Venus | The 20 km band, haze instead of fog, a middle distance, stepped land only here and there |
 | next | A body to walk with (Havok character controller), stamina, the art pass's first materials |
 | then | Trees, rocks and grass as 3D in the painted style; streaming in a worker |
 | then | A shrine and a village; day and night; sound |

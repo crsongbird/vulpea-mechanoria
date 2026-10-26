@@ -8,7 +8,7 @@
  * game or a test asking the height of the same place gets the same answer however it looks (Minecraft's terrain is
  * the same kind of function: docs/prior-art/ringworld-terrain.md §1). Its finest detail is asked for (fine: the size of
  * the smallest feature wanted, in ring units): a painter asks for less detail far off, and the octaves finer than that
- * are faded out, never cut. Inside, the land is worked in metres (the band is 4000 m across at any width, as the
+ * are faded out, never cut. Inside, the land is worked in metres (the band is bandM across, 4000 m unless told, as the
  * Ringworld's painters measure their things), every noise of it periodic round the whole ring, so nothing seams.
  *
  * WHAT IT IS MADE OF: continents and seas from domain-warped noise (sea level by the seed: some rings mostly land, some
@@ -56,10 +56,10 @@ export const LK_FORESTED = { taiga: 1, forest: 1, jungle: 1, savanna: 0.16, mars
 
 /** THE LAND OF ONE RING. seed; o: { W, Hw (the rim walls' height), forms (Landforms 0..1), flat (relief kept in cities,
  *  0..1), terrace (the builders' step, ring units, 0 none), z0 (where across the band the seed stands you), blend (how
- *  wide the biomes' transitions, 0..1, by Detail) }. Returns { M (ring units a metre), sea (0), height(a, z, fine),
+ *  wide the biomes' transitions, 0..1, by Detail), bandM (the band's width in metres, 4000 unless told) }. Returns { M (ring units a metre), sea (0), height(a, z, fine),
  *  climate(a, z, h) → [warmth, moisture], biomes(a, z, h) → weights by LK_BIOMES, snowline }. */
 export function lkLand(seed, o){
-  const s = seed | 0, W = o.W, M = W*0.00025, F = o.forms ?? 0.5, flat = o.flat ?? 1, Hwm = o.Hw/M, z0m = (o.z0 || 0)/M;
+  const s = seed | 0, W = o.W, bandM = o.bandM ?? 4000, M = W/bandM, halfM = bandM/2, F = o.forms ?? 0.5, flat = o.flat ?? 1, Hwm = o.Hw/M, z0m = (o.z0 || 0)/M;
   const Cm = 2*Math.PI/M, P = wl => Math.max(1, Math.round(Cm/wl)), N = (u, v, wl, salt) => { const p = P(wl), w = Cm/p; return lkNoise(u/w, v/w, s + salt*7919, p); };
   const fbm = (u, v, wl, oct, salt, g = 0.5) => { let t = 0, a = 1, n = 0; for(let k = 0; k < oct; k++){ t += a*N(u, v, wl, salt + k*13); n += a; a *= g; wl *= 0.5; } return t/n; };
   const ridged = (u, v, wl, oct, salt) => { let t = 0, a = 1, n = 0, w = 1; for(let k = 0; k < oct; k++){ const r = 1 - Math.abs(N(u, v, wl, salt + k*17)); const q = r*r*w; t += a*q; n += a; w = Math.min(1, q*1.6); a *= 0.5; wl *= 0.5; } return t/n; };
@@ -74,7 +74,8 @@ export function lkLand(seed, o){
   const stepM = (13 + 15*(lkHash(s, 15, 4041)/4294967296))*(0.6 + 0.8*F);
   // (the lapse rate: warmth lost a metre up, so strong that a ring's hills show their zones, woods giving way to tundra,
   //  and the high ranges stand white over the plains: the snowline some 250 to 800 m up by the seed's warmth)
-  const LAPSE = 1.15/1000;
+  //  (and gentler under taller walls, whose mountains stand taller: the zones keep their place on the slopes)
+  const LAPSE = 1.15/1000*1200/Math.max(1200, Hwm);
   // (the raw land in metres, and the parts the climate and the colours read: s, how far inland; dryness of the region)
   const raw = (u, v, fineM) => {
     const wu = 1800*fbm(u, v, 7000, 2, 1), wv = 1800*fbm(u, v, 7000, 2, 2);
@@ -94,7 +95,7 @@ export function lkLand(seed, o){
     for(let wl = 380, k = 0; wl >= fineM*0.85 && k < 12; wl *= 0.5, k++){ const fade = lkSmooth(fineM*0.85, fineM*1.7, wl); relief += fade*0.075*wl*(0.4 + F)*(0.3 + 0.7*land)*N(u, v, wl, 40 + k); }
     h += relief*flat;
     // (the spill mountains at the walls' feet)
-    const av = Math.abs(v); if(av > 1100) h += Hwm*0.42*F*lkSmooth(1100, 2000, av)*(0.3 + 0.7*(0.5 + 0.5*N(u, 2.7, 720, 8)));
+    const av = Math.abs(v); if(av > halfM - 900) h += Hwm*0.42*F*lkSmooth(halfM - 900, halfM, av)*(0.3 + 0.7*(0.5 + 0.5*N(u, 2.7, 720, 8)));
     // (canyons cut stepwise through the dry uplands; rivers across the lowlands to the sea; lakes in the wet ones)
     const dryR = 0.5 - 0.5*fbm(u, v, 18000, 2, 12);
     if(dryR > 0.55 && sc > 0.12){ const ch = lkSmooth(0.93, 0.985, 1 - Math.abs(N(u + wu, v + wv, 2600, 9))), g = ch*lkSmooth(0.55, 0.75, dryR)*lkSmooth(0.12, 0.35, sc);
@@ -104,12 +105,12 @@ export function lkLand(seed, o){
     if(low > 0.002 && sc > -0.02){ const r = 1 - Math.abs(N(u + wu*1.3, v + wv*1.3, 6000, 10)), vf = lkSmooth(0.9, 0.99, r)*Math.min(1, low*1.5);
       if(vf > 0){ h -= Math.min(Math.max(0, h)*0.6, 30)*vf; const rv = lkSmooth(0.972, 0.992, r)*lkSmooth(0.45, 0.85, low); if(rv > 0) h += (-2.5 - h)*rv; } }
     if(low > 0.002 && dryR < 0.5){ const lk = lkSmooth(0.5, 0.62, 0.5 + 0.5*N(u, v, 2400, 11))*low*lkSmooth(0.5, 0.35, dryR); if(lk > 0) h += (-4 - h)*lk; }
-    // STEPS (Ruby, 2026-10-25: "more steps and ridgelines so we can kinda nail the look of the original, even if that is
-    // sort of 'unrealistic' terrain"): the land laid in shelves, each a broad level ending in a short rise to the next, as
-    // the first painted ring stood ridge behind ridge; the shelves' edges wandering, some regions more stepped than
-    // others, the highest crags left to their own ridges; and read only as finely as the land is asked for, so a far
-    // coarse ring never aliases them into noise
-    if(h > 2){ const St = stepM*(0.75 + 0.5*(0.5 + 0.5*N(u, v, 14000, 33))), tm = (0.55 + 0.45*lkSmooth(-0.25, 0.25, fbm(u, v, 9000, 2, 31)))*lkSmooth(2, 12, h)*(1 - 0.6*lkSmooth(350, 1000, h))*(1 - lkSmooth(St*3, St*14, fineM))*flat;
+    // STEPS, only here and there (Ruby, 2026-10-26: "Note the stepped terrain from before, let's only use that
+    // situationally we had too much of it"): in a stepped region the land is laid in shelves, each a broad level ending
+    // in a short rise to the next, the shelves' edges wandering, the highest crags left to their own ridges; about one
+    // region in five, by the seed; and read only as finely as the land is asked for, so a far coarse ring never aliases
+    // them into noise
+    if(h > 2){ const St = stepM*(0.75 + 0.5*(0.5 + 0.5*N(u, v, 14000, 33))), tm = lkSmooth(0.18, 0.38, fbm(u, v, 9000, 2, 31))*lkSmooth(2, 12, h)*(1 - 0.6*lkSmooth(350, 1000, h))*(1 - lkSmooth(St*3, St*14, fineM))*flat;
       if(tm > 0.01){ const J = St*0.45*N(u + wv, v + wu, 700, 32), q = (h + J)/St, f = q - Math.floor(q); h += ((Math.floor(q) + lkSmooth(0.82, 1, f))*St - J - h)*tm; } }
     // (no mountain above the walls: a soft ceiling)
     if(h > capM - 200){ const k2 = 80; h = capM - k2*Math.log1p(Math.exp((capM - h)/k2)); }

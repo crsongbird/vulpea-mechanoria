@@ -21,7 +21,7 @@ const engine = await openEngine();
 engine.setHardwareScalingLevel(QUALITY);
 const scene = new Scene(engine), sky = Color3.FromArray(SKY);
 scene.clearColor = Color4.FromColor3(sky, 1);
-scene.fogMode = Scene.FOGMODE_EXP2; scene.fogDensity = 0.0002; scene.fogColor = sky;   // (about a third hazed by the chunks' far edge, 3 km off, as the far ring is)
+// (no fog: the air between is each material's haze, haze.js, so the arch overhead stays in sight)
 
 const world = makeWorld(SEED), terrain = makeTerrain(scene, world), far = makeFarRing(scene, world);
 

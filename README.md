@@ -13,6 +13,6 @@ npm install
 npm run dev
 ```
 
-It is early. The current release, **Mercury**, lays the seed's ring round you to walk across: the land curving up
+It is early. The current release, **Venus**, lays the seed's ring round you to walk across: the land curving up
 ahead and behind into an arch across the sky, rim walls on both sides. The design is in
 [docs/design.md](docs/design.md).

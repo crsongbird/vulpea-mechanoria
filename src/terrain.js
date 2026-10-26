@@ -1,16 +1,16 @@
 // THE LAND AS MESHES: chunks of the world's land (world/world.js) laid round the player, finer near and coarser far,
 // each a grid of heights coloured by biome, and bent to the ring's curve (ring.js). A chunk is built once for its place
 // and detail and kept; the set changes as the player crosses chunk lines, and every chunk is turned into place each
-// frame as the player walks. The chunks cover the whole band's width near the player, so beyond them only the far ring
-// (farRing.js) is left to draw. Skirts hang from every chunk's edge so the joins between details never open.
+// frame as the player walks. Past them, the far ring (farRing.js) draws the rest, a little lower, so they cover it. Skirts hang from every chunk's edge so the joins between details never open.
 // The sea is the land's own surface where the floor lies under it, so it curves with the ring as the land does.
 import { Mesh, VertexData, StandardMaterial, Color3 } from '@babylonjs/core';
 import { LK_BIOMES } from './world/land.js';
 import { BIOME_COLOURS, SAND, ROCK, SNOW, WATER, DEEP } from './palette.js';
 import { bendAt, place } from './ring.js';
+import { hazed } from './haze.js';
 
 const LODS = [[1, 64], [2, 32], [4, 16], [8, 8], [Infinity, 4]];   // [chunks out from the player's chunk, quads a side]
-export const ALONG = 12;                                           // chunks drawn ahead and behind (about 3 km)
+export const ALONG = 12;                                           // chunks drawn round the player each way (about 3 km)
 
 /** The colour of the land at (x, z), height h: its biomes' colours blended, rock on steep ground, snow up high, sand at
  *  the shore, and under the sea the water, darker as it deepens. slope: rise over run, 0 flat, 1 at 45°. */
@@ -28,7 +28,7 @@ export function makeTerrain(scene, world){
   const R = world.radius, C = world.circumference, NC = Math.round(C/256), CH = C/NC;   // (a whole number of chunks round)
   const zRows = [Math.floor(-world.width/2/CH), Math.ceil(world.width/2/CH) - 1];
   const mat = new StandardMaterial('land', scene);
-  mat.specularColor = new Color3(0, 0, 0); mat.useVertexColor = true; mat.useLogarithmicDepth = true;
+  mat.specularColor = new Color3(0, 0, 0); mat.useVertexColor = true; mat.useLogarithmicDepth = true; hazed(mat);
   const kept = new Map();
   const build = (cx, cz, n) => {
     const x0 = cx*CH, z0 = cz*CH, xc = x0 + CH/2, step = CH/n, N = n + 1, pos = [], col = [], idx = [], nrm = [];
@@ -59,7 +59,7 @@ export function makeTerrain(scene, world){
     update(xp, zp){
       const cx = Math.floor(xp/CH), cz = Math.max(zRows[0], Math.min(zRows[1], Math.floor(zp/CH))), key0 = cx + ',' + cz;
       if(key0 !== at){ at = key0; const want = new Set();
-        for(let dz = zRows[0]; dz <= zRows[1]; dz++) for(let dx = -ALONG; dx <= ALONG; dx++){
+        for(let dz = Math.max(zRows[0], cz - ALONG); dz <= Math.min(zRows[1], cz + ALONG); dz++) for(let dx = -ALONG; dx <= ALONG; dx++){
           const r = Math.max(Math.abs(dx), Math.abs(dz - cz)), n = LODS.find(([k]) => r <= k)[1], kx = ((cx + dx) % NC + NC) % NC, key = `${kx},${dz},${n}`;
           want.add(key); if(!kept.has(key)) kept.set(key, build(kx, dz, n)); }
         for(const [k, m] of kept) if(!want.has(k)){ m.dispose(); kept.delete(k); } }

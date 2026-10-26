@@ -2,6 +2,33 @@
 
 Newest first. Each release is named from Sol outward (docs/releases.md).
 
+## Venus (2026-10-26)
+
+- **A wider ring.** The band is now 20 km across, on a ring some 350 km in radius (2,200 km round). The rim walls stand
+  3 km tall, a far haze on either side; the mountains are taller too, and stay under the walls.
+- **Air instead of fog.** Distant land fades into a pale blue haze that stops thickening, so the arch overhead stays in
+  sight however far off it is.
+- **A middle distance.** The land from a few kilometres out to about 50 km is drawn at 250 m detail, and rebuilt as you
+  walk on. The rest of the ring is coarser.
+- **Stepped land only here and there.** The shelves and terraces now come in about one region in five, not everywhere.
+- **Snow where it belongs.** The snowline rises with the taller mountains: about 1.2 km on this seed.
+- **No seams of light between chunks.** Each point's shading now comes from the heights around it, the same from either
+  side of a join.
+
+### Under the hood
+- `src/haze.js`: a material plugin, in GLSL and WGSL, that mixes toward the haze before the engine's fog step. Scene fog
+  is off.
+- `src/farRing.js`: 64 coarse segments, a finer middle distance over the three about the player (the coarse ones there
+  hidden), and both walls in their own meshes.
+- `src/world/land.js` takes the band's width in metres (`bandM`); the walls' spill mountains and the lapse rate follow
+  it.
+- The design draft now holds Ruby's answers: one canon ring with seeds for its state; a rare human with a fox
+  companion, its spells and the switch to play as the fox; dying and waking at a shrine; many builds, as in Hades;
+  Nausicaä among the inspirations; a ring that wobbles for day and night, its outer face solar panels, reactors and
+  besieged spacedocks.
+- `docs/other-worlds.md`: Mars, Titan, Enceladus, a gas-giant platform, Venus and alien worlds, and how gates reach them.
+- A test that the band is 20 km wide and no land stands above the walls.
+
 ## Mercury (2026-10-26)
 
 - **The ring curves.** The land rises ahead and behind you and sweeps up into an arch across the sky; halfway round, the

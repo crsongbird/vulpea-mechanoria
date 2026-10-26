@@ -23,3 +23,9 @@ test('the biomes at a place weigh one in all', () => {
 test('you start on land', () => {
   for(const seed of [1, 4, 1793, 99999]) assert.ok(makeWorld(seed).height(0, 0) > 0);
 });
+
+test('the band is 20 km wide, the ring in proportion, and no land stands above the rim walls', () => {
+  const w = makeWorld(1793); assert.ok(Math.abs(w.width - 20000) < 1e-6 && w.radius > 300000 && w.wallsM === 3000);
+  let top = -Infinity; for(let i = 0; i < 4000; i++){ const x = (i*7919.3) % w.circumference, z = ((i*104729) % 20000) - 10000; top = Math.max(top, w.height(x, z, 50)); }
+  assert.ok(top < w.wallsM, `highest ${top}`);
+});
