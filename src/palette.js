@@ -5,4 +5,5 @@ export const BIOME_COLOURS = {
   forest: [0.27, 0.42, 0.27], steppe: [0.62, 0.60, 0.42], desert: [0.80, 0.68, 0.48], savanna: [0.66, 0.60, 0.36],
   jungle: [0.20, 0.40, 0.24], marsh: [0.34, 0.42, 0.32] };
 export const SAND = [0.78, 0.72, 0.56], ROCK = [0.50, 0.48, 0.46], SNOW = [0.92, 0.94, 0.97];
-export const SKY = [0.62, 0.74, 0.86], WATER = [0.22, 0.42, 0.52];
+export const SKY = [0.62, 0.74, 0.86], WATER = [0.22, 0.42, 0.52], DEEP = [0.10, 0.22, 0.34];
+export const WALL = [0.46, 0.50, 0.56], WALL_TOP = [0.66, 0.70, 0.74];   // (the rim walls: weathered metal, paler on top)

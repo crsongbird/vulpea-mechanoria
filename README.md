@@ -13,5 +13,6 @@ npm install
 npm run dev
 ```
 
-It is early: the first release, **Sol**, lays the seed's land round you to walk across. The design is in
+It is early. The current release, **Mercury**, lays the seed's ring round you to walk across: the land curving up
+ahead and behind into an arch across the sky, rim walls on both sides. The design is in
 [docs/design.md](docs/design.md).

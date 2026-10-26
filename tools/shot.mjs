@@ -8,7 +8,7 @@ const server = http.createServer((q, s) => { let f = path.join(ROOT, decodeURICo
   if(!f.startsWith(ROOT) || !fs.existsSync(f)){ s.writeHead(404); s.end(); return; } s.writeHead(200, { 'content-type': types[path.extname(f)] || 'application/octet-stream' }); fs.createReadStream(f).pipe(s); });
 await new Promise(r => server.listen(0, '127.0.0.1', r));
 const req = createRequire(import.meta.url); let pw; try { pw = req('playwright'); } catch(e){ pw = await import('/opt/npm-tools/node_modules/playwright/index.mjs'); }
-const browser = await pw.chromium.launch({ args: ['--enable-unsafe-webgpu', '--enable-features=Vulkan', '--use-vulkan=swiftshader', '--use-angle=swiftshader', '--ignore-gpu-blocklist'] });
+const browser = await pw.chromium.launch({ args: ['--enable-unsafe-webgpu', '--enable-features=Vulkan', '--use-vulkan=swiftshader', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
 const page = await browser.newPage({ viewport: { width: 960, height: 540 } }), errs = [];
 page.on('pageerror', e => errs.push(String(e))); page.on('console', m => { if(m.type() === 'error' || m.type() === 'warning') errs.push(m.text()); });
 await page.goto(`http://127.0.0.1:${server.address().port}/index.html${query}`);

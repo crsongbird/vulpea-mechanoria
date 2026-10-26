@@ -24,14 +24,16 @@ node tools/shot.mjs out.png [?query] [waitMs]   # dist/ in headless Chromium on 
 ```
 
 URL options: `?seed=N` picks the world; `?gl` forces WebGL2 instead of WebGPU; `?q=low|mid|high` sets the render
-scale.
+scale; `?x=metres` starts you that far round the ring; `?pitch=degrees` tilts the first view up.
 
 ## The map
 
 | Path | What |
 |---|---|
 | `src/main.js` | boot: opens WebGPU, falling back to WebGL2; scene, sky, lights, the walker's camera |
-| `src/terrain.js` | the land's chunks round the player, finer near, coarser far, joined by skirts |
+| `src/ring.js` | the ring's curve: meshes built about a place and turned into place round the player (floating origin) |
+| `src/terrain.js` | the land's chunks round the player across the whole band, finer near, coarser far, joined by skirts |
+| `src/farRing.js` | the whole ring, coarse, as one mesh: the arch overhead and both rim walls |
 | `src/palette.js` | every colour of the land in one place (placeholder until the art pass) |
 | `src/release.js` | the release's name (`docs/releases.md`: from Sol outward) |
 | `src/world/` | the world as pure functions of the seed. These are engine-free: no Babylon import |
@@ -41,7 +43,7 @@ scale.
 | `src/world/wild.js` · `happenings.js` | where every creature and every happening (fights, hunts, marches) is at any time |
 | `test/` | `node --test` suites |
 | `tools/` | headless checks |
-| `docs/` | design, engine notes, prior art, releases, the idea book |
+| `docs/` | `design.md` (read first), `other-worlds.md`, `engine/babylon.md`, `prior-art/`, `releases.md`, the idea book |
 
 ## Rules
 
@@ -49,7 +51,8 @@ scale.
    same answer however it is asked for, so nothing pops or jumps. Never store what can be computed.
 2. **`src/world/` never imports the engine.** It must run in Node for the tests and in a worker.
 3. **Metres, seconds, radians.** x runs along the ring and comes round after the circumference; z runs across the
-   band; y is up.
+   band; y is up. The player stays at the scene's origin and the world turns under them (`src/ring.js`): never put a
+   mesh at its ring position directly.
 4. **Phones first.** Every feature has a low setting. Measure on a phone-sized budget: draw calls, triangles, texture
    memory.
 5. **Research before building.** Look up how games and engines do it, and write what you learn into `docs/prior-art/`
